@@ -3,7 +3,7 @@ def calculate_risk_details(filtered_allergens):
         return 0, "Low"
 
     severity_scores = {
-        "High": 70,
+        "High": 75,
         "Medium": 45,
         "Low": 20,
         "Safe": 0,

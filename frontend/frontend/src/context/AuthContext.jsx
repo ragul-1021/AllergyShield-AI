@@ -26,8 +26,7 @@ export function AuthProvider({ children }) {
     } else {
       setIsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadProfile, token]);
 
   const login = async (email, password) => {
     const { data } = await loginRequest(email, password);

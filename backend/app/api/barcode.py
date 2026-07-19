@@ -18,7 +18,6 @@ def barcode_scan(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     barcode = read_barcode(file_path)
-    print("Barcode:", barcode)
 
     if barcode is None:
         return {
@@ -26,7 +25,6 @@ def barcode_scan(file: UploadFile = File(...)):
         }
 
     product = get_product_details(barcode)
-    print("Product:", product)
 
     if product is None:
         return {

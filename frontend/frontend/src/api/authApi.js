@@ -1,7 +1,5 @@
 import api from "./axios";
 
-// The backend's /auth/login endpoint expects OAuth2PasswordRequestForm,
-// i.e. an application/x-www-form-urlencoded body with "username" & "password".
 export const loginRequest = (email, password) => {
   const form = new URLSearchParams();
   form.append("username", email);

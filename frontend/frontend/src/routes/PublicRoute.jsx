@@ -1,7 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 
-// Prevents an already-authenticated user from seeing login/register pages.
 export default function PublicRoute() {
   const { isAuthenticated, isLoading } = useAuth();
 

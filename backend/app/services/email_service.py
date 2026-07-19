@@ -14,14 +14,7 @@ class EmailService:
         self.password = password
     
     def send_reset_email(self, user_email: str, reset_link: str):
-        """Send password reset email"""
-        # If no credentials configured, just log the link
         if not self.password:
-            print("\n" + "="*60)
-            print("EMAIL NOT CONFIGURED - Reset Link for Testing:")
-            print(f"Email: {user_email}")
-            print(f"Link: {reset_link}")
-            print("="*60 + "\n")
             return True
         
         try:
@@ -56,12 +49,10 @@ class EmailService:
                 server.send_message(message)
             
             return True
-        except Exception as e:
-            print(f"Email send failed: {e}")
+        except Exception:
             return False
     
     def generate_reset_token(self, db: Session, user_email: str) -> str:
-        """Generate and save reset token"""
         user = db.query(User).filter(User.email == user_email).first()
         if not user:
             return None
@@ -74,7 +65,6 @@ class EmailService:
         return reset_token
     
     def verify_reset_token(self, db: Session, token: str):
-        """Verify reset token is valid and not expired"""
         user = db.query(User).filter(User.reset_token == token).first()
         
         if not user:
