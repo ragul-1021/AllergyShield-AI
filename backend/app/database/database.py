@@ -5,7 +5,16 @@ import os
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./allergyshield.db")
+def get_database_url():
+    database_url = os.getenv("DATABASE_URL", "sqlite:///./allergyshield.db").strip()
+    database_url = database_url.strip("\"'`")
+
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+    return database_url
+
+DATABASE_URL = get_database_url()
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, connect_args=connect_args)

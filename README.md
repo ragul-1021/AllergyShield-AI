@@ -37,6 +37,8 @@ Deploy the backend as a Docker web service from the `backend` folder. The Docker
 
 Set `DATABASE_URL`, `SECRET_KEY`, `CORS_ORIGINS`, and `FRONTEND_URL` in the hosting dashboard.
 
+For Render Postgres, copy the database **External Database URL** or **Internal Database URL** as the value of `DATABASE_URL`. Do not use placeholder text and do not wrap the URL in quotes.
+
 Deploy the frontend as a static site from `frontend/frontend` with:
 
 ```bash
