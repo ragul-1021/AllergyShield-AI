@@ -1,7 +1,9 @@
 import pandas as pd
+from pathlib import Path
 
-master = pd.read_csv("datasets/allergens_master.csv")
-master = pd.read_csv("datasets/allergens_master.csv")
+DATASET_PATH = Path(__file__).resolve().parents[2] / "datasets" / "allergens_master.csv"
+
+master = pd.read_csv(DATASET_PATH)
 
 master["ingredient"] = master["ingredient"].fillna("").str.lower().str.strip()
 master["allergen"] = master["allergen"].fillna("None")
