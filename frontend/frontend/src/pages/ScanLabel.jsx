@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { recognize } from "tesseract.js";
 import {
   AlertCircle,
   CheckCircle2,
@@ -10,7 +11,7 @@ import {
   Trash2,
   UploadCloud,
 } from "lucide-react";
-import { scanProductLabel } from "../api/scanApi";
+import { scanProductText } from "../api/scanApi";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
@@ -24,6 +25,7 @@ export default function ScanLabel() {
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState("");
   const [dragging, setDragging] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState(0);
 
   useEffect(() => {
     if (!file) {
@@ -35,7 +37,7 @@ export default function ScanLabel() {
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
-  const progress = loading ? 78 : file ? 18 : 0;
+  const progress = loading ? Math.max(18, ocrProgress) : file ? 18 : 0;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,9 +49,25 @@ export default function ScanLabel() {
     setLoading(true);
     setError("");
     setResult(null);
+    setOcrProgress(20);
 
     try {
-      const { data } = await scanProductLabel(file);
+      const { data: ocrData } = await recognize(file, "eng", {
+        logger: (message) => {
+          if (message.status === "recognizing text") {
+            setOcrProgress(Math.max(20, Math.round(message.progress * 72)));
+          }
+        },
+      });
+
+      const extractedText = ocrData?.text?.trim();
+      if (!extractedText) {
+        throw new Error("No readable ingredient text was found. Try a clearer, brighter label image.");
+      }
+
+      setOcrProgress(86);
+      const { data } = await scanProductText(extractedText, file.name);
+      setOcrProgress(100);
       setResult(data);
     } catch (err) {
       const detail = err?.response?.data?.detail;

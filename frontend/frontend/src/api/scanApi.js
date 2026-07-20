@@ -6,3 +6,7 @@ export const scanProductLabel = (file) => {
 
   return api.post("/scan", form);
 };
+
+export const scanProductText = (text, filename) => {
+  return api.post("/scan-text", { text, filename });
+};

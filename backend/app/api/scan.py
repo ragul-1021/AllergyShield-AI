@@ -1,16 +1,15 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from fastapi import Depends
 
 from app.database.database import get_db
-from app.models import scan_history
 from app.api.auth import get_current_user
 from app.models.user import User
 from app.models.scan_history import ScanHistory
 from app.services.allergy_checker import detect_allergens,find_unknown_ingredients
 
 import shutil
-import os
 import tempfile
 from pathlib import Path
 from uuid import uuid4
@@ -19,43 +18,15 @@ from app.utils.text_cleaner import clean_text
 from app.services.ocr_services import extract_txt
 from app.services.allergy_explanation import ALLERGY_EXPLANATIONS
 from app.services.recommendations import RECOMMENDATIONS
-from app.services import recommendations
 from app.services.risk_scoring import calculate_risk_details
 router = APIRouter()
 
-@router.post("/scan")
+class ScanTextRequest(BaseModel):
+    text: str
+    filename: str | None = None
 
-def scan_label(file : UploadFile = File(...), db : Session = Depends(get_db),current_user : User = Depends(get_current_user)):
-    content_type = (file.content_type or "").lower()
-    if content_type and not content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Please upload an image file.")
 
-    upload_dir = Path(tempfile.gettempdir()) / "allergyshield_uploads"
-    upload_dir.mkdir(parents=True, exist_ok=True)
-
-    suffix = Path(file.filename or "").suffix.lower() or ".jpg"
-    file_path = upload_dir / f"{uuid4().hex}{suffix}"
-
-    try:
-        with file_path.open("wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-
-        extracted_txt = extract_txt(str(file_path))
-    except Exception as exc:
-        raise HTTPException(
-            status_code=500,
-            detail=f"OCR failed while reading the image: {exc}",
-        ) from exc
-
-    if not extracted_txt.strip():
-        raise HTTPException(
-            status_code=422,
-            detail="No readable ingredient text was found. Try a clearer, brighter label image.",
-        )
-
-    cleaned_txt = clean_text(extracted_txt)
-    
-    detected_allergens = detect_allergens(cleaned_txt)
+def build_scan_result(cleaned_txt: str, filename: str, image_path: str, db: Session, current_user: User):
     detected_allergens = detect_allergens(cleaned_txt)
 
     all_detected_allergens = ", ".join(
@@ -129,7 +100,7 @@ def scan_label(file : UploadFile = File(...), db : Session = Depends(get_db),cur
             ]
     new_scan = ScanHistory(
     user_id=current_user.id,
-    image_path=str(file_path),
+    image_path=image_path,
     extracted_text=cleaned_txt,
     status=status,
     detected_allergens=all_detected_allergens
@@ -139,7 +110,7 @@ def scan_label(file : UploadFile = File(...), db : Session = Depends(get_db),cur
     db.commit()
     db.refresh(new_scan)
     return {
-    "filename": file.filename,
+    "filename": filename,
     "ingredients": cleaned_txt,
     "status": status,
     "detected_allergens": all_detected_allergens,
@@ -149,6 +120,68 @@ def scan_label(file : UploadFile = File(...), db : Session = Depends(get_db),cur
     "risk_level": risk_level,
     "recommendations": recommendations
 }
+
+
+@router.post("/scan-text")
+def scan_text(payload: ScanTextRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    if not payload.text.strip():
+        raise HTTPException(
+            status_code=422,
+            detail="No readable ingredient text was found. Try a clearer, brighter label image.",
+        )
+
+    cleaned_txt = clean_text(payload.text)
+    if not cleaned_txt:
+        raise HTTPException(
+            status_code=422,
+            detail="No readable ingredient text was found. Try a clearer, brighter label image.",
+        )
+
+    return build_scan_result(
+        cleaned_txt=cleaned_txt,
+        filename=payload.filename or "browser-ocr-image",
+        image_path="browser-ocr",
+        db=db,
+        current_user=current_user,
+    )
+
+
+@router.post("/scan")
+def scan_label(file : UploadFile = File(...), db : Session = Depends(get_db),current_user : User = Depends(get_current_user)):
+    content_type = (file.content_type or "").lower()
+    if content_type and not content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Please upload an image file.")
+
+    upload_dir = Path(tempfile.gettempdir()) / "allergyshield_uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    suffix = Path(file.filename or "").suffix.lower() or ".jpg"
+    file_path = upload_dir / f"{uuid4().hex}{suffix}"
+
+    try:
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        extracted_txt = extract_txt(str(file_path))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"OCR failed while reading the image: {exc}",
+        ) from exc
+
+    if not extracted_txt.strip():
+        raise HTTPException(
+            status_code=422,
+            detail="No readable ingredient text was found. Try a clearer, brighter label image.",
+        )
+
+    return build_scan_result(
+        cleaned_txt=clean_text(extracted_txt),
+        filename=file.filename,
+        image_path=str(file_path),
+        db=db,
+        current_user=current_user,
+    )
     
     
 
