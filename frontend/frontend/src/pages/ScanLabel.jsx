@@ -52,7 +52,12 @@ export default function ScanLabel() {
       const { data } = await scanProductLabel(file);
       setResult(data);
     } catch (err) {
-      setError(err?.response?.data?.detail || "Could not scan this image.");
+      const detail = err?.response?.data?.detail;
+      setError(
+        typeof detail === "string"
+          ? detail
+          : err?.message || "Could not scan this image."
+      );
     } finally {
       setLoading(false);
     }

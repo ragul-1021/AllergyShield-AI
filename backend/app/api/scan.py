@@ -1,4 +1,4 @@
-from fastapi import APIRouter ,UploadFile,File
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from fastapi import Depends
 
@@ -11,6 +11,9 @@ from app.services.allergy_checker import detect_allergens,find_unknown_ingredien
 
 import shutil
 import os
+import tempfile
+from pathlib import Path
+from uuid import uuid4
 
 from app.utils.text_cleaner import clean_text
 from app.services.ocr_services import extract_txt
@@ -23,17 +26,33 @@ router = APIRouter()
 @router.post("/scan")
 
 def scan_label(file : UploadFile = File(...), db : Session = Depends(get_db),current_user : User = Depends(get_current_user)):
-    
-    upload_dir = "uploads"
-    
-    os.makedirs(upload_dir,exist_ok=True)
-    
-    file_path = os.path.join(upload_dir,file.filename)
-    
-    with open(file_path,"wb") as buffer:
-        shutil.copyfileobj(file.file,buffer)
-        
-    extracted_txt = extract_txt(file_path)
+    content_type = (file.content_type or "").lower()
+    if content_type and not content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Please upload an image file.")
+
+    upload_dir = Path(tempfile.gettempdir()) / "allergyshield_uploads"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    suffix = Path(file.filename or "").suffix.lower() or ".jpg"
+    file_path = upload_dir / f"{uuid4().hex}{suffix}"
+
+    try:
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        extracted_txt = extract_txt(str(file_path))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"OCR failed while reading the image: {exc}",
+        ) from exc
+
+    if not extracted_txt.strip():
+        raise HTTPException(
+            status_code=422,
+            detail="No readable ingredient text was found. Try a clearer, brighter label image.",
+        )
+
     cleaned_txt = clean_text(extracted_txt)
     
     detected_allergens = detect_allergens(cleaned_txt)
@@ -110,7 +129,7 @@ def scan_label(file : UploadFile = File(...), db : Session = Depends(get_db),cur
             ]
     new_scan = ScanHistory(
     user_id=current_user.id,
-    image_path=file_path,
+    image_path=str(file_path),
     extracted_text=cleaned_txt,
     status=status,
     detected_allergens=all_detected_allergens
