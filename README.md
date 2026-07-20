@@ -245,19 +245,22 @@ Safety Report
 
 ## Login
 
-(Add Screenshot)
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b2a641af-a34a-4f84-87b5-a0c97d3df770" />
+
 
 ---
 
 ## Dashboard
 
-(Add Screenshot)
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/daf2a1e5-d338-4236-b94c-69102a26dba6" />
+
 
 ---
 
 ## Scan Result
 
-(Add Screenshot)
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8d6e0a55-666d-4eb3-aece-04868eb92b25" />
+
 
 ---
 
