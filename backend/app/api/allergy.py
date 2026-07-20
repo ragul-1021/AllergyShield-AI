@@ -7,8 +7,15 @@ from app.api.auth import get_current_user
 from app.models.user import User
 from app.schemas.allergy import AllergyRequest
 from app.models.allergy import Allergy
+from app.services.allergy_checker import master
 
 router = APIRouter()
+
+KNOWN_ALLERGENS = {
+    str(name).strip().lower(): str(name).strip()
+    for name in master["allergen"].dropna().unique()
+    if str(name).strip().lower() not in {"", "none", "nan"}
+}
 
 @router.post("/my-allergies")
 def save_allergies(
@@ -19,13 +26,25 @@ def save_allergies(
 
     current_user.allergies.clear()
     for allergy_name in request.allergies:
+        normalized_name = allergy_name.strip()
+        if not normalized_name:
+            continue
+
+        canonical_name = KNOWN_ALLERGENS.get(
+            normalized_name.lower(),
+            normalized_name.title()
+        )
 
         allergy = db.query(Allergy).filter(
-            func.lower(Allergy.name) == allergy_name.strip().lower()
+            func.lower(Allergy.name) == canonical_name.lower()
         ).first()
 
-        if allergy:
-            current_user.allergies.append(allergy)
+        if not allergy:
+            allergy = Allergy(name=canonical_name)
+            db.add(allergy)
+            db.flush()
+
+        current_user.allergies.append(allergy)
 
     db.commit()
     db.refresh(current_user)

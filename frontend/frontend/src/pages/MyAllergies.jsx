@@ -68,7 +68,7 @@ export default function MyAllergies() {
         <div className="mb-6">
           <h3 className="text-lg font-bold text-ink-900 dark:text-white">Allergen watch list</h3>
           <p className="mt-1 text-sm text-ink-500 dark:text-slate-400">
-            Only names that exist in the backend allergy table are saved.
+            Add the allergens you want scans to check against.
           </p>
         </div>
 
