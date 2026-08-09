@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { gsap } from "gsap";
 import {
   AlertCircle,
   CalendarClock,
@@ -32,12 +31,8 @@ export default function ScanHistory() {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
-  const [viewMode, setViewMode] = useState("timeline"); // "timeline" or "grid"
+  const [viewMode, setViewMode] = useState("timeline");
   const [page, setPage] = useState(1);
-  
-  // GSAP refs
-  const historyCardsRef = useRef([]);
-  const filterRef = useRef(null);
 
   const loadHistory = async () => {
     setLoading(true);
@@ -63,32 +58,6 @@ export default function ScanHistory() {
     setPage(1);
   }, [query, filter]);
 
-  // GSAP animation for history cards
-  useEffect(() => {
-    if (!loading && historyCardsRef.current.length > 0) {
-      gsap.fromTo(historyCardsRef.current,
-        { y: 30, opacity: 0 },
-        { 
-          y: 0, 
-          opacity: 1, 
-          duration: 0.4, 
-          stagger: 0.1, 
-          ease: "power2.out" 
-        }
-      );
-    }
-  }, [visible, loading]);
-
-  // GSAP animation for filter change
-  useEffect(() => {
-    if (filterRef.current) {
-      gsap.fromTo(filterRef.current,
-        { scale: 0.95, opacity: 0.8 },
-        { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.7)" }
-      );
-    }
-  }, [filter]);
-
   const filtered = useMemo(() => {
     return scans.filter((scan) => {
       const matchesStatus = filter === "All" || scan.status === filter;
@@ -102,7 +71,6 @@ export default function ScanHistory() {
 
   return (
     <motion.div {...pageTransition} className="space-y-8">
-      {/* Top Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -144,7 +112,6 @@ export default function ScanHistory() {
         </div>
       )}
 
-      {/* Filter & View Mode Bar */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -153,23 +120,17 @@ export default function ScanHistory() {
         <Card className="p-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex-1 max-w-md">
-              <motion.div
-                whileFocus={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Input
-                  icon={Search}
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search by ID, allergen (e.g. Peanut), or text..."
-                  aria-label="Search scan history"
-                />
-              </motion.div>
+              <Input
+                icon={Search}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search by ID, allergen (e.g. Peanut), or text..."
+                aria-label="Search scan history"
+              />
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3">
-              {/* Status Tabs */}
-              <div ref={filterRef} className="flex rounded-2xl bg-cream-100 p-1 dark:bg-charcoal-950 border border-charcoal-200/60 dark:border-charcoal-800">
+              <div className="flex rounded-2xl bg-cream-100 p-1 dark:bg-charcoal-950 border border-charcoal-200/60 dark:border-charcoal-800">
                 {["All", "Safe", "Unsafe"].map((item) => (
                   <motion.button
                     key={item}
@@ -185,47 +146,46 @@ export default function ScanHistory() {
                   >
                     {item}
                   </motion.button>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Grid vs Timeline Toggle */}
-            <div className="flex rounded-2xl bg-cream-100 p-1 dark:bg-charcoal-950 border border-charcoal-200/60 dark:border-charcoal-800">
-              <motion.button
-                type="button"
-                aria-label="Timeline view"
-                onClick={() => setViewMode("timeline")}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === "timeline"
-                    ? "bg-white text-forest-600 shadow-xs dark:bg-charcoal-900 dark:text-emerald-400"
-                    : "text-charcoal-500 hover:text-charcoal-800 dark:text-charcoal-400"
-                }`}
-              >
-                <List size={16} />
-                <span className="hidden sm:inline">Timeline</span>
-              </motion.button>
-              <motion.button
-                type="button"
-                aria-label="Grid view"
-                onClick={() => setViewMode("grid")}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
-                  viewMode === "grid"
-                    ? "bg-white text-forest-600 shadow-xs dark:bg-charcoal-900 dark:text-emerald-400"
-                    : "text-charcoal-500 hover:text-charcoal-800 dark:text-charcoal-400"
-                }`}
-              >
-                <Grid size={16} />
-                <span className="hidden sm:inline">Grid</span>
-              </motion.button>
+              <div className="flex rounded-2xl bg-cream-100 p-1 dark:bg-charcoal-950 border border-charcoal-200/60 dark:border-charcoal-800">
+                <motion.button
+                  type="button"
+                  aria-label="Timeline view"
+                  onClick={() => setViewMode("timeline")}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
+                    viewMode === "timeline"
+                      ? "bg-white text-forest-600 shadow-xs dark:bg-charcoal-900 dark:text-emerald-400"
+                      : "text-charcoal-500 hover:text-charcoal-800 dark:text-charcoal-400"
+                  }`}
+                >
+                  <List size={16} />
+                  <span className="hidden sm:inline">Timeline</span>
+                </motion.button>
+                <motion.button
+                  type="button"
+                  aria-label="Grid view"
+                  onClick={() => setViewMode("grid")}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
+                    viewMode === "grid"
+                      ? "bg-white text-forest-600 shadow-xs dark:bg-charcoal-900 dark:text-emerald-400"
+                      : "text-charcoal-500 hover:text-charcoal-800 dark:text-charcoal-400"
+                  }`}
+                >
+                  <Grid size={16} />
+                  <span className="hidden sm:inline">Grid</span>
+                </motion.button>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
 
-      {/* Main Content Area */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -240,33 +200,30 @@ export default function ScanHistory() {
             </div>
           ) : visible.length ? (
             viewMode === "timeline" ? (
-              /* Timeline Layout */
               <div className="relative space-y-6 before:absolute before:left-5 before:top-2 before:h-[calc(100%-1rem)] before:w-0.5 before:bg-charcoal-200 dark:before:bg-charcoal-800">
                 {visible.map((scan, idx) => (
-                  <div key={scan.id} ref={(el) => (historyCardsRef.current[idx] = el)}>
+                  <div key={scan.id}>
                     <TimelineCard scan={scan} />
                   </div>
                 ))}
               </div>
             ) : (
-              /* Grid Layout */
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {visible.map((scan, idx) => (
-                  <div key={scan.id} ref={(el) => (historyCardsRef.current[idx] = el)}>
+                  <div key={scan.id}>
                     <GridCard scan={scan} />
                   </div>
                 ))}
+              </div>
+            )
+          ) : (
+            <div className="py-12 text-center text-xs font-semibold text-charcoal-500 dark:text-charcoal-400">
+              No scans matching your search or filter parameters.
             </div>
-          )
-        ) : (
-          <div className="py-12 text-center text-xs font-semibold text-charcoal-500 dark:text-charcoal-400">
-            No scans matching your search or filter parameters.
-          </div>
-        )}
-      </Card>
+          )}
+        </Card>
       </motion.div>
 
-      {/* Pagination Footer */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -278,38 +235,29 @@ export default function ScanHistory() {
         </p>
 
         <div className="flex items-center gap-2">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              icon={ChevronLeft}
-              disabled={page <= 1}
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
-            >
-              Prev
-            </Button>
-          </motion.div>
-          <motion.span 
-            key={page}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="text-xs font-bold px-3 text-charcoal-800 dark:text-cream-100"
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            icon={ChevronLeft}
+            disabled={page <= 1}
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
           >
+            Prev
+          </Button>
+          <span className="text-xs font-bold px-3 text-charcoal-800 dark:text-cream-100">
             {page} / {pageCount}
-          </motion.span>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              icon={ChevronRight}
-              disabled={page >= pageCount}
-              onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
-            >
-              Next
-            </Button>
-          </motion.div>
+          </span>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            icon={ChevronRight}
+            disabled={page >= pageCount}
+            onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
+          >
+            Next
+          </Button>
         </div>
       </motion.div>
     </motion.div>
@@ -360,21 +308,15 @@ function TimelineCard({ scan }) {
 
           <div className="flex items-center gap-1.5 text-xs text-charcoal-500 shrink-0">
             <Clock3 size={14} />
-            <span>{scan.scanned_at ? new Date(scan.scanned_at).toLocaleString() : "No date"}</span>
+            <span>{scan.scanned_at ? new Date(scan.scanned_at).toLocaleDateString() : "Unknown date"}</span>
           </div>
         </div>
 
-        {scan.extracted_text && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="mt-3 rounded-xl bg-white p-3 dark:bg-charcoal-900 border border-charcoal-200/50 dark:border-charcoal-800"
-          >
-            <p className="line-clamp-2 text-xs font-mono text-charcoal-600 dark:text-charcoal-400 leading-relaxed">
-              {scan.extracted_text}
-            </p>
-          </motion.div>
-        )}
+        <div className="mt-3 border-t border-charcoal-200/60 pt-3 dark:border-charcoal-800">
+          <p className="text-xs text-charcoal-600 dark:text-charcoal-400 line-clamp-2">
+            {scan.extracted_text || "No ingredient text available"}
+          </p>
+        </div>
       </motion.div>
     </motion.article>
   );
@@ -385,43 +327,31 @@ function GridCard({ scan }) {
 
   return (
     <motion.div
-      whileHover={{ scale: 1.03, y: -5 }}
+      whileHover={{ y: -4, scale: 1.02 }}
       transition={{ duration: 0.2 }}
     >
-      <Card hover className="p-5 flex flex-col justify-between">
-        <div>
-          <div className="flex items-center justify-between border-b border-charcoal-200/60 pb-3 dark:border-charcoal-800">
-            <span className="font-display font-extrabold text-sm text-charcoal-900 dark:text-white">
-              Scan #{scan.id}
-            </span>
-            <Badge tone={unsafe ? "danger" : "success"}>{scan.status || "Unknown"}</Badge>
-          </div>
-
-          <div className="my-4 space-y-2">
-            <div className="flex items-start gap-2 text-xs">
-              <motion.div whileHover={{ rotate: 15 }} transition={{ duration: 0.2 }}>
-                <Tag size={14} className="shrink-0 text-charcoal-400 mt-0.5" />
-              </motion.div>
-              <span className="font-semibold text-charcoal-700 dark:text-charcoal-300 line-clamp-2">
-                {scan.detected_allergens || "No allergens flagged"}
-              </span>
-            </div>
-
-            {scan.extracted_text && (
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="line-clamp-3 text-xs font-mono text-charcoal-500 bg-cream-100 p-2.5 rounded-xl dark:bg-charcoal-950 leading-relaxed"
-              >
-                {scan.extracted_text}
-              </motion.p>
-            )}
-          </div>
+      <Card hover className="h-full p-5">
+        <div className="flex items-start justify-between mb-3">
+          <Badge tone={unsafe ? "danger" : "success"}>{scan.status || "Unknown"}</Badge>
+          <span className="text-xs text-charcoal-500">#{scan.id}</span>
         </div>
 
-        <div className="border-t border-charcoal-200/60 pt-3 dark:border-charcoal-800 text-[11px] font-semibold text-charcoal-400 flex items-center justify-between">
-          <span>{scan.scanned_at ? new Date(scan.scanned_at).toLocaleDateString() : "No date"}</span>
+        <div className="mb-3">
+          <p className="text-xs font-semibold text-charcoal-700 dark:text-charcoal-300 mb-1">
+            Allergens:
+          </p>
+          <p className={`text-xs font-bold ${unsafe ? "text-danger-600" : "text-emerald-600"}`}>
+            {scan.detected_allergens || "None"}
+          </p>
+        </div>
+
+        <div className="text-xs text-charcoal-500 dark:text-charcoal-400 line-clamp-3">
+          {scan.extracted_text || "No text available"}
+        </div>
+
+        <div className="mt-3 pt-3 border-t border-charcoal-200/60 dark:border-charcoal-800 flex items-center gap-1.5 text-xs text-charcoal-500">
+          <Clock3 size={12} />
+          <span>{scan.scanned_at ? new Date(scan.scanned_at).toLocaleDateString() : "Unknown"}</span>
         </div>
       </Card>
     </motion.div>
