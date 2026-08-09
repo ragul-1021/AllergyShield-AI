@@ -231,54 +231,72 @@ cd AllergyShield-AI
 ⚙️ Backend Setup
 
 Navigate to the backend:
-
+```
 cd backend
+```
 
 Create a virtual environment:
-
+```
 python -m venv myenv
+```
 Windows
+```
 myenv\Scripts\activate
+```
 
 Install dependencies:
-
+```
 pip install -r requirements.txt
+```
 
 Run the backend:
-
+```
 uvicorn app.main:app --reload
+```
 
 Backend will normally be available at:
-
+```
 http://127.0.0.1:8000
+```
 
 Swagger API documentation:
+```
 
 http://127.0.0.1:8000/docs
+```
 
 💻 Frontend Setup
 
 Open another terminal.
 
 Navigate to the frontend:
+```
 
 cd frontend
+```
 
 Install dependencies:
+```
 
 npm install
-
+```
 Start the development server:
 
+```
 npm run dev
+```
 
 Build for production:
+```
 
 npm run build
+```
 
 The frontend normally runs at:
+```
 
 http://localhost:5173
+```
 
 🔑 Environment Variables
 
@@ -341,27 +359,34 @@ Example:
 
 DATABASE_URL=your_own_postgresql_connection
 5. Run the Frontend
+```
 cd frontend
 npm install
 npm run dev
+```
 6. Run the Backend
 
 Open another terminal:
-
+```
 cd backend
 python -m venv myenv
+```
 
 Windows:
-
+```
 myenv\Scripts\activate
+```
 
 Install dependencies:
+```
 
 pip install -r requirements.txt
+```
 
 Run:
-
+```
 uvicorn app.main:app --reload
+```
 
 Each fork should use its own database, environment variables, and deployment configuration.
 
