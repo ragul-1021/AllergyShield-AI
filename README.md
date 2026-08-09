@@ -1,49 +1,43 @@
-# AllergyShield AI
+# 🛡️ AllergyShield AI
 
-## Backend
+> **AI-powered food ingredient and allergen detection system**
 
-```bash
-cd backend
-python -m venv .venv
-.\.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
+AllergyShield AI is a smart food-safety application designed to help users identify potential allergens from packaged food ingredient labels.
 
-Set these environment variables in production:
+Users can upload or scan an ingredient label, extract the ingredient text using OCR, and automatically analyze the ingredients against an allergen knowledge base. The system identifies potential allergens and presents the results in an easy-to-understand format.
 
-- `DATABASE_URL`
-- `SECRET_KEY`
-- `CORS_ORIGINS`
-- `FRONTEND_URL`
-- `SMTP_EMAIL`
-- `SMTP_PASSWORD`
-- `SMTP_SERVER`
-- `SMTP_PORT`
+---
 
-## Frontend
+## ✨ Features
 
-```bash
-cd frontend/frontend
-npm install
-npm run build
-```
+### 📸 Intelligent Label Scanning
+- Upload food-product images
+- Extract ingredient text using OCR
+- Supports packaged food labels
+- Handles real-world ingredient text
 
-Set `VITE_API_BASE_URL` to the deployed backend URL.
+### 🧠 Allergen Detection
+- Matches extracted ingredients against an allergen knowledge base
+- Detects known allergenic ingredients
+- Supports ingredient synonyms
+- Supports multiple allergen categories
+- Provides severity information
 
-## Deploy
+### 🔍 Ingredient Knowledge Base
+The system is designed to support an expanded ingredient database containing:
 
-Deploy the backend as a Docker web service from the `backend` folder. The Dockerfile installs the native barcode dependency required by `pyzbar`.
+- 1,000+ ingredient names
+- Major allergen categories
+- Ingredient synonyms
+- Scientific ingredient names
+- Food additive codes
+- International ingredient names
+- Indian ingredients and food terminology
 
-Set `DATABASE_URL`, `SECRET_KEY`, `CORS_ORIGINS`, and `FRONTEND_URL` in the hosting dashboard.
+Example:
 
-For Render Postgres, copy the database **External Database URL** or **Internal Database URL** as the value of `DATABASE_URL`. Do not use placeholder text and do not wrap the URL in quotes.
-
-Deploy the frontend as a static site from `frontend/frontend` with:
-
-```bash
-npm install
-npm run build
-```
-
-Use `dist` as the publish directory.
+```text
+whey → Milk
+caseinate → Milk
+soy lecithin → Soy
+wheat flour → Wheat
