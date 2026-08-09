@@ -563,7 +563,11 @@ Creator and developer of AllergyShield AI.
 If you find AllergyShield AI useful:
 
 ⭐ Star the repository
+
 🍴 Fork the project
+
 🐛 Report issues
+
 💡 Suggest improvements
+
 🔧 Submit pull requests
