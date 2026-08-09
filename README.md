@@ -1,324 +1,92 @@
-🛡️ AllergyShield AI — README Summary
-# 🛡️ AllergyShield AI
+Markdown# 🛡️ AllergyShield AI
 
-### Intelligent Food Label Analysis & Personalized Allergen Detection
+> **Intelligent Food Label Analysis & Personalized Allergen Detection**
+> 
+> *Scan. Detect. Understand. Stay Safe.*
 
-> **Scan. Detect. Understand. Stay Safe.**
-
-AllergyShield AI is an AI-assisted food safety platform that analyzes packaged-food ingredient labels and identifies potential allergens.
-
-It combines OCR, ingredient normalization, an expandable allergen knowledge base, personalized allergy profiles, authentication, and scan history.
+AllergyShield AI is an AI-assisted food safety platform that analyzes packaged-food ingredient labels and identifies potential allergens. It combines OCR, ingredient normalization, an expandable allergen knowledge base, personalized allergy profiles, authentication, and scan history.
 
 ---
 
 ## 🚀 Key Features
 
-- 📷 Food ingredient label scanning
-- 🔍 OCR-based ingredient extraction
-- 🧠 Ingredient and allergen matching
-- 🔄 Ingredient synonym support
-- 🧪 Allergen category and severity detection
-- 👤 Personalized allergy profiles
-- 🔐 JWT-based authentication
-- 📋 User scan history
-- 🇮🇳 Indian ingredient support
-- 🌍 International ingredient terminology support
-- 📊 Personalized risk analysis
-- 🎨 Animated responsive frontend
+* **📷 Food Ingredient Label Scanning:** Easily upload images of packaged food labels.
+* **🔍 OCR-Based Ingredient Extraction:** Automatically reads text from physical labels.
+* **🧠 Ingredient & Allergen Matching:** Maps extracted terms against risk databases.
+* **🔄 Ingredient Synonym Support:** Recognizes multiple terms for the same base ingredient.
+* **🧪 Category & Severity Detection:** Classifies risks by allergen group and severity level.
+* **👤 Personalized Allergy Profiles:** Tailwind alerts specifically to individual user sensitivities.
+* **🔐 JWT-Based Authentication:** Secure registration, login, and session handling.
+* **📋 User Scan History:** Track and revisit previous label scans anytime.
+* **🇮🇳 Indian Ingredient Support:** Recognizes common regional food terms (e.g., *besan, atta, paneer*).
+* **🌍 International Terminology Support:** Handles global food additives and technical names.
+* **📊 Personalized Risk Analysis:** Generates immediate safety evaluations tailored to the user.
+* **🎨 Animated Responsive Frontend:** Modern UI powered by Framer Motion and GSAP.
 
 ---
 
 ## 🔬 How It Works
 
 ```text
-Food Label
-    ↓
-Image Upload
-    ↓
-OCR
-    ↓
-Text Cleaning
-    ↓
-Ingredient Normalization
-    ↓
-Allergen Knowledge Base
-    ↓
-Personalized Risk Analysis
-    ↓
-Safety Result
-
-Example:
-
-Soy Lecithin
-      ↓
-Soy
-      ↓
-Potential Allergen
-Whey
-  ↓
-Milk / Dairy
-  ↓
-Potential Allergen
-🧠 Ingredient Knowledge Base
-
-The system is designed to support an expandable knowledge base containing:
-
-1,000+ ingredient names
-40+ allergen categories
-Ingredient synonyms
-Scientific names
-Food additive identifiers
-Indian ingredient names
-International terminology
-Severity information
-
-Example:
-
-{
+Food Label ──> Image Upload ──> OCR ──> Text Cleaning ──> Ingredient Normalization
+                                                                   │
+Safety Result <── Personalized Risk Analysis <── Allergen Knowledge Base
+Example Normalization EngineRaw Extracted TextNormalized IngredientCategory / Allergen MatchedSoy LecithinSoyPotential Allergen (Soy)WheyMilk / DairyPotential Allergen (Dairy)🧠 Ingredient Knowledge BaseThe system is designed to support an expandable knowledge base containing:1,000+ ingredient names40+ allergen categoriesIngredient synonyms & scientific namesFood additive identifiers (E-numbers)Indian ingredient names & international terminologySeverity classification flagsJSON{
   "ingredient": "whey",
   "allergen": "milk",
   "category": "dairy",
   "severity": "high"
 }
-🇮🇳 Indian Ingredient Support
-
-The knowledge base can include commonly used Indian ingredients such as:
-
-atta
-maida
-suji
-rava
-besan
-paneer
-ghee
-dahi
-lassi
-poha
-murmura
-ragi
-jowar
-bajra
-rajma
-moong
-urad
-toor
-chana
-hing
-jeera
-ajwain
-elaichi
-haldi
-imli
-sabudana
-🏗️ Architecture
-             USER
-               │
-               ▼
-      React + Vite Frontend
-               │
-            REST API
-               │
-               ▼
-          FastAPI Backend
-               │
-       ┌───────┼────────┐
-       ▼       ▼        ▼
-      OCR   Knowledge  PostgreSQL
-            Base
-       └───────┼────────┘
-               ▼
-        Risk Analysis
-               │
-               ▼
-        Safety Results
-🛠️ Technology Stack
-Frontend
-React
-Vite
-JavaScript
-React Router
-Axios
-Framer Motion
-GSAP
-React Icons / Lucide
-Backend
-Python
-FastAPI
-Uvicorn
-SQLAlchemy
-Pydantic
-JWT
-Passlib / bcrypt
-Database
-PostgreSQL
-SQLAlchemy ORM
-AI / OCR
-OCR-based text extraction
-Text normalization
-Ingredient knowledge base
-Rule-based allergen detection
-Deployment
-Vercel for frontend
-Cloud hosting for backend
-PostgreSQL database
-📁 Project Structure
-AllergyShield-AI/
+🇮🇳 Indian Ingredient SupportThe knowledge base natively maps commonly used regional ingredients:atta • maida • suji • rava • besan • paneer • ghee • dahi • lassi • poha • murmura • ragi • jowar • bajra • rajma • moong • urad • toor • chana • hing • jeera • ajwain • elaichi • haldi • imli • sabudana🏗️ ArchitecturePlaintext                     ┌──────────────────┐
+                     │       USER       │
+                     └────────┬─────────┘
+                              │
+                              ▼
+                    React + Vite Frontend
+                              │
+                           REST API
+                              │
+                              ▼
+                       FastAPI Backend
+                              │
+             ┌────────────────┼────────────────┐
+             ▼                ▼                ▼
+        OCR Engine     Knowledge Base     PostgreSQL
+             └────────────────┼────────────────┘
+                              ▼
+                        Risk Analysis
+                              │
+                              ▼
+                        Safety Results
+🛠️ Technology StackFrontendCore: React, Vite, JavaScriptRouting & HTTP: React Router, AxiosAnimations: Framer Motion, GSAPIcons: Lucide / React IconsBackendFramework: Python, FastAPI, UvicornDatabase Management: SQLAlchemy, PostgreSQLSecurity & Auth: Pydantic, JWT, Passlib / bcryptAI & OCROCR-based text extraction & normalizationRule-based allergen detection and knowledge base matchingDeploymentFrontend: VercelBackend & DB: Cloud hosting (FastAPI) + Managed PostgreSQL📁 Project StructurePlaintextAllergyShield-AI/
 │
-├── backend/
-├── frontend/
-├── ml/
-├── docs/
-├── requirements.txt
-└── README.md
-🚀 Run Locally
-Prerequisites
-Python 3.x
-Node.js
-npm
-PostgreSQL
-Git
-Clone
-git clone https://github.com/ragul-1021/AllergyShield-AI.git
+├── backend/            # FastAPI application, database schemas, and API routes
+├── frontend/           # React + Vite user interface and components
+├── ml/                 # OCR processing modules and normalization logic
+├── docs/               # Documentation assets
+├── requirements.txt    # Python dependencies
+└── README.md           # Project documentation
+🚀 Run LocallyPrerequisitesPython 3.xNode.js & npmPostgreSQLGit1. Clone the RepositoryBashgit clone [https://github.com/ragul-1021/AllergyShield-AI.git](https://github.com/ragul-1021/AllergyShield-AI.git)
 cd AllergyShield-AI
-Backend
-cd backend
+2. Backend SetupBashcd backend
 python -m venv myenv
 
-Windows:
-
+# On Windows
 myenv\Scripts\activate
 
-Install:
+# On macOS/Linux
+source myenv/bin/activate
 
+# Install dependencies
 pip install -r requirements.txt
 
-Run:
-
+# Start local server
 uvicorn app.main:app --reload
-Frontend
-
-Open another terminal:
-
-cd frontend
+3. Frontend SetupOpen a new terminal window:Bashcd frontend
 npm install
 npm run dev
-
-Production build:
-
-npm run build
-🔑 Environment Variables
-
-Create your own .env file.
-
-Example:
-
-VITE_API_URL=http://127.0.0.1:8000
-
-Never commit:
-
-.env
-.env.local
-.env.production
-
-Never expose:
-
-Database passwords
-JWT secrets
-API keys
-OAuth secrets
-SMTP passwords
-Production credentials
-
-Use .env.example as a safe template.
-
-🍴 Fork & Run
-
-Anyone can fork the project and create their own independent instance.
-
-git clone https://github.com/YOUR_USERNAME/AllergyShield-AI.git
+For production builds:Bashnpm run build
+🔑 Environment VariablesCreate a .env file in your root/backend/frontend directories using .env.example as a template.Code snippetVITE_API_URL=[http://127.0.0.1:8000](http://127.0.0.1:8000)
+⚠️ Security Warning: Never commit .env, .env.local, or sensitive credentials (Database passwords, JWT secrets, API keys) to version control.🍴 Fork & RunTo run your own independent instance:Fork the repo on GitHub, then clone your fork:Bashgit clone [https://github.com/YOUR_USERNAME/AllergyShield-AI.git](https://github.com/YOUR_USERNAME/AllergyShield-AI.git)
 cd AllergyShield-AI
-
-Then:
-
-cd frontend
-npm install
-npm run dev
-
-For the backend:
-
-cd backend
-python -m venv myenv
-myenv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-
-Each fork should use its own database and environment variables.
-
-🌐 Deployment
-Frontend
-
-Recommended configuration for Vercel:
-
-Root Directory: frontend
-Build Command: npm run build
-Output Directory: dist
-Backend
-
-Deploy the FastAPI backend separately and configure the production environment variables.
-
-Database
-
-Use a separate PostgreSQL database for each deployment.
-
-📈 Roadmap
-Completed
- User registration
- User login
- JWT authentication
- Password hashing
- Image upload
- OCR processing
- Ingredient extraction
- PostgreSQL integration
- Scan history
- Allergy profile
- Ingredient normalization
- Allergen matching
- Synonym support
- Indian ingredient support
-Future
- 1,000+ verified ingredients
- 40+ allergen categories
- Improved OCR
- Barcode scanning
- Multilingual labels
- Advanced personalized risk scoring
- Mobile application
- Smart shopping assistant
- Product comparison
- Allergy notifications
- Analytics dashboard
-⚠️ Safety Disclaimer
-
-AllergyShield AI is an assistive food-label analysis tool and is not a medical diagnostic system.
-
-OCR errors, incomplete labels, manufacturing cross-contamination, and undisclosed ingredients may affect results.
-
-Users with severe allergies should always verify official product information and follow appropriate medical guidance.
-
-👨‍💻 Author
-Ragul AR
-
-Artificial Intelligence & Machine Learning
-
-Creator and developer of AllergyShield AI.
-
-⭐ Support
-
-If you find the project useful:
-
-⭐ Star the repository
-🍴 Fork the project
-🐛 Report issues
-💡 Suggest improvements
-🔧 Submit pull requests
+Set up the frontend and backend following the local setup instructions above.Ensure you configure your own database connection and environment variables.🌐 DeploymentFrontend (Vercel):Root Directory: frontendBuild Command: npm run buildOutput Directory: distBackend: Deploy the FastAPI backend on your choice of cloud platform and attach production environment variables.Database: Connect a managed PostgreSQL instance.📈 RoadmapCompleted ✅[x] User registration & login with JWT authentication & password hashing[x] Label image upload & OCR text extraction[x] PostgreSQL integration & user scan history tracking[x] Allergy profile customization[x] Ingredient normalization, synonym matching & allergen detection[x] Indian ingredient supportFuture Vision 🔮[ ] Expansion to 1,000+ verified ingredients and 40+ categories[ ] Barcode scanning & multilingual label processing[ ] Advanced personalized risk scoring engine[ ] Dedicated mobile application[ ] Smart shopping assistant & product comparisons[ ] Custom allergy notifications & analytics dashboard⚠️ Safety DisclaimerAllergyShield AI is an assistive food-label analysis tool and is not a medical diagnostic system.OCR errors, incomplete packaging labels, cross-contamination warnings, and undisclosed ingredients may affect detection accuracy. Users with severe or life-threatening allergies should always manually verify official product information and consult medical professionals.👨‍💻 AuthorRagul ARArtificial Intelligence & Machine LearningCreator and developer of AllergyShield AI.⭐ SupportIf you find this project useful, feel free to support it!🌟 Star the repository🍴 Fork the project🐛 Report issues & submit PRs
