@@ -1,5 +1,10 @@
+import { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 import {
   ArrowRight,
   Brain,
@@ -32,6 +37,77 @@ const stats = [
 ];
 
 export default function Landing() {
+  const heroRef = useRef(null);
+  const titleRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const ctaRef = useRef(null);
+  const featureCardsRef = useRef(null);
+  const statsRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Hero section entrance animations
+      gsap.fromTo(heroRef.current, 
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
+      );
+
+      // Text reveal animation
+      gsap.fromTo(titleRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6, delay: 0.2, ease: "power2.out" }
+      );
+
+      gsap.fromTo(subtitleRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6, delay: 0.4, ease: "power2.out" }
+      );
+
+      gsap.fromTo(ctaRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.6, delay: 0.6, ease: "power2.out" }
+      );
+
+      // Feature cards stagger animation
+      if (featureCardsRef.current) {
+        gsap.fromTo(featureCardsRef.current.children,
+          { opacity: 0, y: 30 },
+          { 
+            opacity: 1, 
+            y: 0, 
+            duration: 0.5, 
+            stagger: 0.1, 
+            delay: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: featureCardsRef.current,
+              start: "top 80%",
+            }
+          }
+        );
+      }
+
+      // Stats counter animation
+      if (statsRef.current) {
+        gsap.fromTo(statsRef.current.children,
+          { opacity: 0, scale: 0.8 },
+          { 
+            opacity: 1, 
+            scale: 1, 
+            duration: 0.6, 
+            stagger: 0.15,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+              trigger: statsRef.current,
+              start: "top 85%",
+            }
+          }
+        );
+      }
+    }, heroRef);
+
+    return () => ctx.revert();
+  }, []);
   return (
     <motion.div {...pageTransition} className="page-shell min-h-screen">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
@@ -52,7 +128,12 @@ export default function Landing() {
       </header>
 
       <main>
-        <section className="mx-auto grid max-w-7xl items-center gap-10 px-6 pb-20 pt-14 lg:grid-cols-[1.05fr_0.95fr] lg:pt-24">
+        <section ref={heroRef} className="relative mx-auto grid max-w-7xl items-center gap-10 px-6 pb-20 pt-14 lg:grid-cols-[1.05fr_0.95fr] lg:pt-24 overflow-hidden">
+          {/* Floating ambient background */}
+          <div className="pointer-events-none absolute left-1/2 top-0 -z-10 -translate-x-1/2 overflow-hidden w-full max-w-7xl h-full">
+            <div className="animate-slow-float absolute -top-10 left-10 h-72 w-72 rounded-full bg-primary-500/10 blur-3xl" />
+            <div className="animate-slow-float-reverse absolute top-40 right-10 h-80 w-80 rounded-full bg-primary-400/10 blur-3xl" />
+          </div>
           <div>
             <motion.div
               initial={{ opacity: 0, y: 8 }}
@@ -63,14 +144,14 @@ export default function Landing() {
               <ScanLine size={14} />
               AI label intelligence
             </motion.div>
-            <h1 className="max-w-4xl text-5xl font-extrabold leading-[1.04] tracking-tight text-ink-900 dark:text-white sm:text-6xl">
+            <h1 ref={titleRef} className="max-w-4xl text-5xl font-extrabold leading-[1.04] tracking-tight text-ink-900 dark:text-white sm:text-6xl">
               Scan Food Labels Instantly with AI
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-ink-500 dark:text-slate-400">
+            <p ref={subtitleRef} className="mt-6 max-w-2xl text-lg leading-8 text-ink-500 dark:text-slate-400">
               Detect allergens fast and accurately from food label images, then get clear safety
               guidance based on your saved allergy profile.
             </p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+            <div ref={ctaRef} className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Button as={Link} to="/scan" size="lg" icon={ScanLine}>
                 Scan Now
               </Button>
@@ -128,7 +209,7 @@ export default function Landing() {
               Built for fast, confident food safety checks.
             </h2>
           </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div ref={featureCardsRef} className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {features.map(({ icon: Icon, title, text }) => (
               <Card key={title} hover className="p-6">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-500">
@@ -142,7 +223,7 @@ export default function Landing() {
         </section>
 
         <section className="mx-auto max-w-7xl px-6 py-12">
-          <Card className="grid gap-6 p-8 md:grid-cols-3">
+          <Card ref={statsRef} className="grid gap-6 p-8 md:grid-cols-3">
             {stats.map(([value, label]) => (
               <div key={label} className="text-center">
                 <p className="text-4xl font-extrabold text-ink-900 dark:text-white">{value}</p>

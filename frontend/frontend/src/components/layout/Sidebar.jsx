@@ -11,98 +11,118 @@ import {
   ShieldPlus,
   User,
   X,
+  Sparkles,
 } from "lucide-react";
 
 const navItems = [
-  { to: "/dashboard", label: "Workspace", icon: Home },
-  { to: "/scan", label: "Scan Food", icon: ScanLine },
-  { to: "/allergies", label: "Allergy Shield", icon: ShieldPlus },
-  { to: "/history", label: "Food Timeline", icon: Clock3 },
-  { to: "/profile", label: "My Safety Profile", icon: User },
+  { to: "/dashboard", label: "Dashboard", icon: Home },
+  { to: "/scan", label: "Scan Label", icon: ScanLine },
+  { to: "/allergies", label: "My Allergies", icon: ShieldPlus },
+  { to: "/history", label: "Scan History", icon: Clock3 },
+  { to: "/profile", label: "Safety Profile", icon: User },
 ];
 
 function SidebarContent({ onNavigate, collapsed, onToggle }) {
   return (
-    <div className="flex h-full flex-col">
-      <div className="px-4 py-6">
-        <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between gap-3"}`}>
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.25rem] bg-gradient-to-br from-primary-500 to-accent-500 text-white shadow-xl shadow-primary-500/25">
-              <ShieldCheck size={24} />
+    <div className="flex h-full flex-col justify-between py-6">
+      <div>
+        {/* Sidebar Brand Header */}
+        <div className="px-5 mb-8">
+          <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
+            <div className="flex items-center gap-3">
+              <motion.div
+                whileHover={{ rotate: 10, scale: 1.05 }}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-forest-600 text-white shadow-md shadow-forest-600/20 dark:bg-emerald-500"
+              >
+                <ShieldCheck size={24} />
+              </motion.div>
+              {!collapsed && (
+                <div className="flex flex-col">
+                  <span className="font-display text-lg font-extrabold tracking-tight text-charcoal-900 dark:text-white">
+                    AllergyShield
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-forest-600 dark:text-emerald-400">
+                    Healthcare AI
+                  </span>
+                </div>
+              )}
             </div>
-            {!collapsed && (
-              <div className="min-w-0">
-                <span className="block truncate text-xl font-black tracking-tight text-ink-900 dark:text-white">
-                  AllergyShield
-                </span>
-                <span className="text-xs font-black uppercase tracking-[0.28em] text-primary-500">
-                  AI Safety
-                </span>
-              </div>
+
+            {!collapsed && onToggle && (
+              <button
+                type="button"
+                onClick={onToggle}
+                aria-label="Collapse sidebar"
+                className="rounded-xl p-1.5 text-charcoal-400 hover:bg-charcoal-100 hover:text-charcoal-800 dark:hover:bg-charcoal-800 dark:hover:text-white transition-colors"
+              >
+                <ChevronLeft size={18} />
+              </button>
             )}
           </div>
-          {!collapsed && onToggle && (
+
+          {collapsed && onToggle && (
             <button
               type="button"
               onClick={onToggle}
-              aria-label="Collapse sidebar"
-              className="rounded-xl p-2 text-ink-400 transition hover:bg-white hover:text-primary-600 dark:hover:bg-slate-900"
+              aria-label="Expand sidebar"
+              className="mx-auto mt-4 flex rounded-xl p-1.5 text-charcoal-400 hover:bg-charcoal-100 hover:text-charcoal-800 dark:hover:bg-charcoal-800 dark:hover:text-white transition-colors"
             >
-              <ChevronLeft size={18} />
+              <ChevronRight size={18} />
             </button>
           )}
         </div>
-        {collapsed && onToggle && (
-          <button
-            type="button"
-            onClick={onToggle}
-            aria-label="Expand sidebar"
-            className="mx-auto mt-5 flex rounded-xl p-2 text-ink-400 transition hover:bg-white hover:text-primary-600 dark:hover:bg-slate-900"
-          >
-            <ChevronRight size={18} />
-          </button>
-        )}
+
+        {/* Nav Links */}
+        <nav className="space-y-1.5 px-3">
+          {navItems.map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              onClick={onNavigate}
+              title={collapsed ? label : undefined}
+              className={({ isActive }) =>
+                `group relative flex items-center gap-3.5 rounded-2xl px-3.5 py-3 text-sm font-bold transition-all duration-200 ${
+                  collapsed ? "justify-center" : ""
+                } ${
+                  isActive
+                    ? "bg-white text-forest-600 shadow-sm ring-1 ring-charcoal-200/80 dark:bg-charcoal-900 dark:text-emerald-400 dark:ring-charcoal-800"
+                    : "text-charcoal-600 hover:bg-cream-100/80 hover:text-charcoal-900 dark:text-charcoal-400 dark:hover:bg-charcoal-800/60 dark:hover:text-white"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.span
+                      layoutId="sidebarActivePill"
+                      className="absolute inset-y-2 left-1 w-1.5 rounded-full bg-forest-600 dark:bg-emerald-500"
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                  <Icon
+                    size={20}
+                    className={`shrink-0 transition-colors ${
+                      isActive ? "text-forest-600 dark:text-emerald-400" : "text-charcoal-500 group-hover:text-charcoal-800 dark:text-charcoal-400 dark:group-hover:text-cream-100"
+                    }`}
+                  />
+                  {!collapsed && <span className="truncate">{label}</span>}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
       </div>
 
-      <nav className="flex-1 space-y-2 px-3">
-        {navItems.map(({ to, label, icon: Icon }) => (
-          <NavLink
-            key={to}
-            to={to}
-            onClick={onNavigate}
-            title={collapsed ? label : undefined}
-            className={({ isActive }) =>
-              `group relative flex items-center gap-3 rounded-[1.25rem] px-3 py-3.5 text-base font-black transition-all ${
-                collapsed ? "justify-center" : ""
-              } ${
-                isActive
-                  ? "bg-white text-primary-700 shadow-xl shadow-primary-500/10 ring-1 ring-primary-100 dark:bg-slate-900 dark:text-white dark:ring-slate-800"
-                  : "text-ink-500 hover:bg-white/80 hover:text-ink-900 hover:shadow-sm dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white"
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && (
-                  <motion.span
-                    layoutId="sidebarActivePill"
-                    className="absolute inset-y-2 left-1 w-1 rounded-full bg-primary-500"
-                  />
-                )}
-                <Icon size={20} className={isActive ? "text-primary-600 dark:text-primary-400" : "text-current"} />
-                {!collapsed && <span className="truncate">{label}</span>}
-              </>
-            )}
-          </NavLink>
-        ))}
-      </nav>
-
+      {/* Bottom Promo Card */}
       {!collapsed && (
-        <div className="p-4">
-          <div className="rounded-[1.75rem] border border-primary-100 bg-gradient-to-br from-primary-50 to-white p-4 shadow-sm dark:border-primary-500/20 dark:from-primary-500/10 dark:to-slate-900">
-            <p className="text-base font-black text-ink-900 dark:text-white">Today&apos;s safety ritual</p>
-            <p className="mt-2 text-sm leading-6 text-ink-500 dark:text-slate-400">
-              Scan first, compare allergens, then decide with confidence.
+        <div className="px-4">
+          <div className="rounded-2xl border border-forest-500/20 bg-forest-50/60 p-4 shadow-xs dark:border-emerald-500/20 dark:bg-forest-600/10">
+            <div className="flex items-center gap-2 text-forest-700 dark:text-emerald-400">
+              <Sparkles size={16} />
+              <span className="text-xs font-extrabold uppercase tracking-wider">Nature & Health</span>
+            </div>
+            <p className="mt-2 text-xs font-semibold text-charcoal-700 dark:text-charcoal-300 leading-relaxed">
+              Always verify food packaging ingredients for critical allergies.
             </p>
           </div>
         </div>
@@ -116,9 +136,10 @@ export default function Sidebar({ mobileOpen, onClose }) {
 
   return (
     <>
+      {/* Desktop Sidebar */}
       <aside
-        className={`hidden shrink-0 border-r border-white/70 bg-gradient-to-b from-white/90 via-primary-50/60 to-white/80 backdrop-blur-xl transition-[width] duration-200 dark:border-slate-800/80 dark:from-slate-950/92 dark:via-slate-900/84 dark:to-slate-950/88 lg:block ${
-          collapsed ? "w-24" : "w-76"
+        className={`hidden shrink-0 border-r border-charcoal-200/80 bg-cream-50/95 backdrop-blur-md transition-all duration-300 dark:border-charcoal-800 dark:bg-charcoal-900/95 lg:block ${
+          collapsed ? "w-20" : "w-72"
         }`}
       >
         <SidebarContent
@@ -127,6 +148,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
         />
       </aside>
 
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -136,21 +158,21 @@ export default function Sidebar({ mobileOpen, onClose }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onClose}
-              className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-40 bg-charcoal-950/60 backdrop-blur-xs lg:hidden"
             />
             <motion.aside
               key="drawer"
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "tween", duration: 0.2 }}
-              className="fixed inset-y-0 left-0 z-50 w-80 bg-white shadow-2xl dark:bg-slate-950 lg:hidden"
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="fixed inset-y-0 left-0 z-50 w-76 bg-cream-50 shadow-2xl dark:bg-charcoal-900 lg:hidden"
             >
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close menu"
-                className="absolute right-4 top-5 rounded-xl p-2 text-ink-400 hover:bg-ink-100 hover:text-ink-700 dark:hover:bg-slate-800 dark:hover:text-white"
+                className="absolute right-4 top-5 rounded-xl p-2 text-charcoal-400 hover:bg-charcoal-100 hover:text-charcoal-800 dark:hover:bg-charcoal-800 dark:hover:text-white"
               >
                 <X size={20} />
               </button>

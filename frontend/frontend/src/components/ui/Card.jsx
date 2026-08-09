@@ -3,9 +3,8 @@ import { motion } from "framer-motion";
 export default function Card({ children, className = "", hover = false, ...props }) {
   return (
     <motion.section
-      whileHover={hover ? { y: -3 } : undefined}
-      transition={{ duration: 0.18 }}
-      className={`rounded-[1.75rem] border border-white/80 bg-white/88 shadow-xl shadow-slate-200/50 ring-1 ring-ink-100/70 backdrop-blur dark:border-slate-800 dark:bg-slate-900/86 dark:shadow-black/20 dark:ring-slate-800/80 ${className}`}
+      whileHover={hover ? { y: -4, transition: { duration: 0.2 } } : undefined}
+      className={`rounded-2xl border border-charcoal-200/80 bg-cream-50/90 shadow-[0_4px_20px_-4px_rgba(31,111,80,0.05)] backdrop-blur-md dark:border-charcoal-800 dark:bg-charcoal-900/90 dark:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.4)] ${className}`}
       {...props}
     >
       {children}

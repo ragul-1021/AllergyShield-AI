@@ -6,11 +6,14 @@ import { useAuth } from "../context/useAuth";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Progress from "../components/ui/Progress";
+import Navbar from "../components/layout/Navbar";
+import { useTheme } from "../hooks/useTheme";
 import { pageTransition } from "../animations/page";
 
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -26,11 +29,26 @@ export default function Register() {
   }, [email]);
   const nameError = name && name.trim().length < 2 ? "Name must be at least 2 characters." : "";
   const passwordError = password && password.length < 6 ? "Password must be at least 6 characters." : "";
-  const strength = Math.min(100, password.length * 14 + (/[A-Z]/.test(password) ? 16 : 0));
+  const strength = Math.min(100, password.length * 14 + (/[A-Z]/.test(password) ? 16 : 0) + (/[0-9]/.test(password) ? 16 : 0));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (nameError || emailError || passwordError) return;
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (nameError) {
+      setError(nameError);
+      return;
+    }
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
     setError("");
     setLoading(true);
     try {
@@ -38,50 +56,70 @@ export default function Register() {
       setSuccess(true);
       setTimeout(() => navigate("/login"), 1200);
     } catch (err) {
-      setError(err?.response?.data?.detail || "Could not create account. Please try again.");
+      const detail = err?.response?.data?.detail;
+      if (!err?.response) {
+        setError("Cannot connect to backend server. Make sure FastAPI backend is running on http://127.0.0.1:8000.");
+      } else {
+        setError(typeof detail === "string" ? detail : "Could not create account. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <motion.div {...pageTransition} className="page-shell grid min-h-screen lg:grid-cols-[0.95fr_1.05fr]">
-      <section className="flex items-center justify-center px-4 py-10 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
-          className="glass-panel w-full max-w-md rounded-3xl p-8"
-        >
-          <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-500 text-white">
-              <ShieldCheck size={23} />
-            </div>
-            <h1 className="text-2xl font-extrabold text-ink-900 dark:text-white">Create your account</h1>
-            <p className="mt-2 text-sm text-ink-500 dark:text-slate-400">
-              Start scanning safely with AllergyShield AI
-            </p>
-          </div>
+    <motion.div {...pageTransition} className="page-shell min-h-screen flex flex-col">
+      <Navbar isLanding theme={theme} onThemeToggle={toggleTheme} />
 
-          {error && (
-            <div className="mb-4 flex items-center gap-2 rounded-2xl bg-danger-50 px-4 py-3 text-sm font-medium text-danger-600 dark:bg-danger-500/10">
-              <AlertCircle size={17} className="shrink-0" />
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="mb-4 flex items-center gap-2 rounded-2xl bg-success-50 px-4 py-3 text-sm font-medium text-success-600 dark:bg-success-500/10">
-              <CheckCircle2 size={17} className="shrink-0" />
-              Account created! Redirecting to login...
-            </div>
-          )}
+      <div className="relative flex-1 grid lg:grid-cols-2 items-center mx-auto max-w-7xl w-full px-4 py-8 sm:px-6 lg:px-8">
+        {/* Left Info Side */}
+        <section className="hidden lg:flex flex-col justify-center pr-12">
+          <span className="text-xs font-bold uppercase tracking-widest text-forest-600 dark:text-emerald-400 mb-2">
+            Instant Account Creation
+          </span>
+          <h1 className="font-display text-4xl font-extrabold tracking-tight text-charcoal-900 dark:text-white lg:text-5xl leading-tight">
+            Build Your Personal <br />
+            <span className="text-forest-600 dark:text-emerald-400">Allergy Shield Today.</span>
+          </h1>
+          <p className="mt-4 text-base leading-relaxed text-charcoal-600 dark:text-charcoal-300">
+            Set up your free account to store allergen watch lists, run OCR product scans, and track ingredient safety timelines.
+          </p>
+        </section>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-ink-700 dark:text-slate-200">
-                Full name
-              </span>
+        {/* Right Glass Card Register Form */}
+        <section className="flex justify-center lg:justify-end w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="glass-panel w-full max-w-md rounded-3xl p-8 shadow-2xl"
+          >
+            <div className="mb-6 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-forest-600 text-white shadow-md shadow-forest-600/25 dark:bg-emerald-500">
+                <ShieldCheck size={28} />
+              </div>
+              <h2 className="font-display text-2xl font-extrabold text-charcoal-900 dark:text-white">Create Account</h2>
+              <p className="mt-1.5 text-xs text-charcoal-500 dark:text-charcoal-400">
+                Start scanning food labels with AI precision
+              </p>
+            </div>
+
+            {error && (
+              <div className="mb-4 flex items-center gap-2.5 rounded-2xl bg-danger-50 p-3.5 text-xs font-bold text-danger-700 border border-danger-500/20 dark:bg-danger-500/10 dark:text-danger-400">
+                <AlertCircle size={16} className="shrink-0 text-danger-600" />
+                <span>{error}</span>
+              </div>
+            )}
+            {success && (
+              <div className="mb-4 flex items-center gap-2.5 rounded-2xl bg-success-50 p-3.5 text-xs font-bold text-success-700 border border-success-500/20 dark:bg-success-500/10 dark:text-emerald-400">
+                <CheckCircle2 size={16} className="shrink-0 text-emerald-600" />
+                <span>Account created! Redirecting to login...</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
               <Input
+                label="Full Name"
                 icon={User}
                 type="text"
                 required
@@ -90,92 +128,67 @@ export default function Register() {
                 placeholder="Jane Doe"
                 error={nameError}
               />
-            </label>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-ink-700 dark:text-slate-200">
-                Email
-              </span>
               <Input
+                label="Email Address"
                 icon={Mail}
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="@email.com"
+                placeholder="you@example.com"
                 error={emailError}
               />
-            </label>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-semibold text-ink-700 dark:text-slate-200">
-                Password
-              </span>
-              <div className="relative">
-                <Input
-                  icon={Lock}
-                  type={showPassword ? "text" : "password"}
-                  required
-                  minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a password"
-                  error={passwordError}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  onClick={() => setShowPassword((visible) => !visible)}
-                  className="absolute right-3 top-3 text-ink-400 hover:text-ink-700 dark:hover:text-white"
-                >
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                </button>
-              </div>
-              {password && (
-                <div className="mt-2">
-                  <Progress value={strength} tone={strength > 70 ? "success" : "warning"} />
-                  <p className="mt-1 text-xs text-ink-500 dark:text-slate-400">
-                    Password strength indicator
-                  </p>
+              <div className="w-full">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-charcoal-600 dark:text-charcoal-300">
+                  Password
+                </label>
+                <div className="relative">
+                  <Input
+                    icon={Lock}
+                    type={showPassword ? "text" : "password"}
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Create a strong password"
+                    error={passwordError}
+                  />
+                  <button
+                    type="button"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    className="absolute right-3.5 top-3.5 text-charcoal-400 hover:text-charcoal-700 dark:hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
-              )}
-            </label>
+                {password && (
+                  <div className="mt-2.5">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-charcoal-500 mb-1">
+                      <span>Password Strength</span>
+                      <span>{strength > 75 ? "Strong" : strength > 45 ? "Medium" : "Weak"}</span>
+                    </div>
+                    <Progress value={strength} tone={strength > 75 ? "success" : strength > 45 ? "warning" : "danger"} />
+                  </div>
+                )}
+              </div>
 
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? "Creating account..." : "Sign up"}
-            </Button>
-          </form>
+              <Button type="submit" loading={loading} variant="primary" size="lg" className="w-full mt-2">
+                Sign Up
+              </Button>
+            </form>
 
-          <p className="mt-6 text-center text-sm text-ink-500 dark:text-slate-400">
-            Already have an account?{" "}
-            <Link to="/login" className="font-bold text-primary-600 hover:text-primary-700">
-              Log in
-            </Link>
-          </p>
-        </motion.div>
-      </section>
-
-      <section className="hidden flex-col justify-between px-10 py-10 lg:flex">
-        <Link to="/" className="flex items-center justify-end gap-3">
-          <span className="text-lg font-extrabold text-ink-900 dark:text-white">AllergyShield AI</span>
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-500 text-white shadow-lg shadow-primary-500/25">
-            <ShieldCheck size={22} />
-          </span>
-        </Link>
-        <div className="ml-auto max-w-xl text-right">
-          <p className="text-sm font-bold uppercase tracking-[0.22em] text-primary-500">Personalized scanning</p>
-          <h1 className="mt-4 text-5xl font-extrabold leading-tight text-ink-900 dark:text-white">
-            Build your allergy-aware AI workspace.
-          </h1>
-          <p className="mt-5 text-lg leading-8 text-ink-500 dark:text-slate-400">
-            Save your profile, scan food labels, and review risks in one calm dashboard.
-          </p>
-        </div>
-        <p className="text-right text-sm text-ink-500 dark:text-slate-400">
-          Designed for clarity before every bite.
-        </p>
-      </section>
+            <div className="mt-6 border-t border-charcoal-200/60 pt-6 text-center text-xs font-medium text-charcoal-500 dark:border-charcoal-800 dark:text-charcoal-400">
+              Already have an account?{" "}
+              <Link to="/login" className="font-bold text-forest-600 hover:text-forest-700 dark:text-emerald-400 transition-colors">
+                Log In
+              </Link>
+            </div>
+          </motion.div>
+        </section>
+      </div>
     </motion.div>
   );
 }

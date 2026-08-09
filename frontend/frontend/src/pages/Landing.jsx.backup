@@ -1,0 +1,728 @@
+import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import { gsap } from "gsap";
+import {
+  ArrowRight,
+  Brain,
+  CheckCircle2,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Database,
+  FileScan,
+  History,
+  ScanLine,
+  ShieldAlert,
+  ShieldCheck,
+  Sparkles,
+  Search,
+  Star,
+  Activity,
+  Check,
+  RefreshCw,
+  Utensils,
+  Leaf,
+  Shield,
+  Zap,
+} from "lucide-react";
+import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
+import Navbar from "../components/layout/Navbar";
+import { useTheme } from "../hooks/useTheme";
+import { pageTransition } from "../animations/page";
+
+const sampleProducts = [
+  {
+    name: "Organic Granola Crunch Bar",
+    category: "Snack / Cereal",
+    ingredients: "Whole grain oats, Honey, Almonds, Coconut oil, Peanut flour, Dried cranberries, Sea salt.",
+    detectedAllergens: [
+      { name: "Almonds", severity: "Medium", type: "Tree Nut", safe: false },
+      { name: "Peanuts", severity: "High", type: "Peanut", safe: false },
+    ],
+    safeIngredients: ["Whole grain oats", "Honey", "Coconut oil", "Cranberries", "Sea salt"],
+    riskScore: 78,
+    status: "Unsafe",
+    recommendation: "Avoid if you have peanut or tree nut allergies. Contains real peanut flour.",
+  },
+  {
+    name: "Pure Oat & Honey Crisp",
+    category: "Breakfast Cereal",
+    ingredients: "Rolled oats, Pure wildflower honey, Cane sugar, Sunflower oil, Vanilla extract, Cinnamon.",
+    detectedAllergens: [],
+    safeIngredients: ["Rolled oats", "Honey", "Cane sugar", "Sunflower oil", "Vanilla", "Cinnamon"],
+    riskScore: 0,
+    status: "Safe",
+    recommendation: "Safe to consume! No saved allergens matched this product label.",
+  },
+  {
+    name: "Dairy-Free Dark Chocolate",
+    category: "Confectionery",
+    ingredients: "Cocoa mass, Organic cane sugar, Cocoa butter, Soy lecithin, Natural vanilla flavor.",
+    detectedAllergens: [
+      { name: "Soy Lecithin", severity: "Low", type: "Soy", safe: false },
+    ],
+    safeIngredients: ["Cocoa mass", "Cane sugar", "Cocoa butter", "Vanilla"],
+    riskScore: 35,
+    status: "Warning",
+    recommendation: "Contains soy lecithin. Caution advised if severely sensitive to soy derivatives.",
+  },
+];
+
+const features = [
+  {
+    icon: FileScan,
+    title: "OCR Label Extraction",
+    text: "Extract ingredient lists directly from phone photos or product packages in seconds with high OCR precision.",
+  },
+  {
+    icon: Brain,
+    title: "Intelligent AI Analysis",
+    text: "Cross-references obscure chemical names and derivative terms against medical allergen databases.",
+  },
+  {
+    icon: ShieldAlert,
+    title: "Personalized Watch List",
+    text: "Compares food label data against your unique, saved allergen profile with custom severity ratings.",
+  },
+  {
+    icon: History,
+    title: "Scan Timeline & History",
+    text: "Review past food decisions, spot recurring allergen exposure, and filter history by safety status.",
+  },
+  {
+    icon: Clock,
+    title: "Instant Grocery Results",
+    text: "Built for high-speed food checks while grocery shopping, dining out, or reviewing meal ingredients.",
+  },
+  {
+    icon: Sparkles,
+    title: "Healthcare-Adjacent Quality",
+    text: "Clean, minimal interface designed for clarity and confidence, avoiding artificial noise.",
+  },
+];
+
+const statsData = [
+  { number: 1000, suffix: "+", label: "Ingredients Indexed" },
+  { number: 40, suffix: "+", label: "Allergen Classes" },
+  { number: 99, suffix: "%", label: "OCR Accuracy Rate" },
+];
+
+const testimonials = [
+  {
+    quote: "AllergyShield AI gave me immediate peace of mind while grocery shopping with my child who has severe peanut and soy allergies.",
+    author: "Elena Rostova",
+    role: "Parent & Food Advocate",
+    rating: 5,
+  },
+  {
+    quote: "The ingredient OCR extraction is incredibly accurate even on wrinkled or curved food packaging labels.",
+    author: "Dr. Marcus Vance",
+    role: "Clinical Nutritionist",
+    rating: 5,
+  },
+  {
+    quote: "I love the warm, clean design. It looks like a high-end medical SaaS product rather than a complex developer utility.",
+    author: "Sarah Jenkins",
+    role: "UI/UX Specialist",
+    rating: 5,
+  },
+];
+
+const faqs = [
+  {
+    question: "How does AllergyShield AI detect hidden allergens?",
+    answer:
+      "AllergyShield AI uses Tesseract OCR and intelligent NLP to parse food label text, extract individual ingredients, and match them against your personal allergy profile including derivative names (like casein for milk, or lecithin for soy).",
+  },
+  {
+    question: "Can I customize my allergen watch list?",
+    answer:
+      "Yes! You can add any custom allergens or select from common allergen categories like Peanuts, Tree Nuts, Dairy, Gluten, Soy, Eggs, Fish, Shellfish, and Sesame.",
+  },
+  {
+    question: "Is my scan data kept private?",
+    answer:
+      "Your uploaded label images and allergy profiles are securely stored under your authenticated account and are never shared or sold.",
+  },
+  {
+    question: "Can I use AllergyShield AI on mobile devices?",
+    answer:
+      "Yes, AllergyShield AI is built mobile-first with a responsive layout optimized for smartphones, tablets, and desktop displays.",
+  },
+];
+
+export default function Landing() {
+  const { theme, toggleTheme } = useTheme();
+  const [selectedDemo, setSelectedDemo] = useState(0);
+  const [isScanningDemo, setIsScanningDemo] = useState(false);
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [openFaq, setOpenFaq] = useState(null);
+  
+  // GSAP refs
+  const heroRef = useRef(null);
+  const titleRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const ctaRef = useRef(null);
+  const floatingElementsRef = useRef([]);
+
+  const currentProduct = sampleProducts[selectedDemo];
+
+  // GSAP animations on mount
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Hero entrance animation
+      gsap.from(titleRef.current, {
+        opacity: 0,
+        y: 50,
+        duration: 1,
+        ease: "power3.out"
+      });
+      
+      gsap.from(subtitleRef.current, {
+        opacity: 0,
+        y: 30,
+        duration: 1,
+        delay: 0.2,
+        ease: "power3.out"
+      });
+      
+      gsap.from(ctaRef.current, {
+        opacity: 0,
+        y: 20,
+        duration: 0.8,
+        delay: 0.4,
+        ease: "power3.out"
+      });
+
+      // Floating elements animation
+      gsap.to(floatingElementsRef.current, {
+        y: "random(-20, 20)",
+        x: "random(-10, 10)",
+        rotation: "random(-5, 5)",
+        duration: "random(3, 6)",
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        stagger: {
+          amount: 0.5,
+          from: "random"
+        }
+      });
+    }, heroRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const handleSimulateScan = (index) => {
+    setSelectedDemo(index);
+    setIsScanningDemo(true);
+    setTimeout(() => {
+      setIsScanningDemo(false);
+    }, 800);
+  };
+
+  return (
+    <motion.div {...pageTransition} className="page-shell min-h-screen">
+      <Navbar isLanding theme={theme} onThemeToggle={toggleTheme} />
+
+      <main>
+        {/* HERO SECTION */}
+        <section ref={heroRef} className="relative mx-auto max-w-7xl px-4 pb-20 pt-12 sm:px-6 lg:px-8 lg:pt-20 overflow-hidden">
+          {/* Enhanced Ambient Background with Floating Particles */}
+          <div className="pointer-events-none absolute left-1/2 top-0 -z-10 -translate-x-1/2 overflow-hidden w-full max-w-7xl h-full">
+            <div className="animate-slow-float absolute -top-10 left-10 h-72 w-72 rounded-full bg-forest-600/10 blur-3xl dark:bg-emerald-500/10" />
+            <div className="animate-slow-float-reverse absolute top-40 right-10 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl dark:bg-forest-600/10" />
+            
+            {/* Floating ingredient particles */}
+            {[
+              { icon: <Leaf size={24} />, top: '15%', left: '10%', delay: 0 },
+              { icon: <Utensils size={20} />, top: '25%', right: '15%', delay: 0.5 },
+              { icon: <Shield size={22} />, bottom: '30%', left: '8%', delay: 1 },
+              { icon: <Zap size={18} />, top: '60%', right: '12%', delay: 1.5 },
+              { icon: <Brain size={20} />, bottom: '20%', right: '20%', delay: 2 },
+            ].map((particle, i) => (
+              <div
+                key={i}
+                ref={(el) => (floatingElementsRef.current[i] = el)}
+                className="absolute text-forest-600/20 dark:text-emerald-400/20"
+                style={{
+                  top: particle.top,
+                  left: particle.left,
+                  right: particle.right,
+                  bottom: particle.bottom,
+                }}
+              >
+                {particle.icon}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mb-6 inline-flex items-center gap-2 rounded-full border border-forest-500/20 bg-cream-50 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-forest-700 shadow-2xs dark:border-emerald-500/30 dark:bg-charcoal-900 dark:text-emerald-400"
+              >
+                <ScanLine size={15} className="text-forest-600 dark:text-emerald-400" />
+                Intelligent Food Safety Engine
+              </motion.div>
+
+              <h1 
+                ref={titleRef}
+                className="font-display text-4xl font-extrabold tracking-tight text-charcoal-900 dark:text-white sm:text-5xl lg:text-6xl leading-[1.1]"
+              >
+                Know What's In Your Food.
+              </h1>
+
+              <p 
+                ref={subtitleRef}
+                className="mt-6 max-w-xl text-lg leading-relaxed text-charcoal-600 dark:text-charcoal-300"
+              >
+                AI-powered ingredient scanning that helps you identify potential allergens before you take a bite.
+              </p>
+
+              <div 
+                ref={ctaRef}
+                className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5"
+              >
+                <Button as={Link} to="/scan" size="lg" variant="primary" icon={ScanLine}>
+                  Scan Food Label
+                </Button>
+                <Button as={Link} to="/history" size="lg" variant="secondary" icon={History}>
+                  View Scan History
+                </Button>
+              </div>
+
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+                className="mt-10 flex items-center gap-6 border-t border-charcoal-200/60 pt-6 dark:border-charcoal-800"
+              >
+                <div className="flex -space-x-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.3, delay: 0.7 + (i * 0.1) }}
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-forest-600 text-xs font-bold text-white ring-2 ring-cream-50 dark:ring-charcoal-950"
+                    >
+                      {["EJ", "DV", "SJ", "AM"][i - 1]}
+                    </motion.div>
+                  ))}
+                </div>
+                <div>
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.8 }}
+                    className="flex items-center gap-1 text-warning-500"
+                  >
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star key={s} size={14} fill="currentColor" />
+                    ))}
+                  </motion.div>
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.9 }}
+                    className="mt-0.5 text-xs font-semibold text-charcoal-500 dark:text-charcoal-400"
+                  >
+                    Trusted by 2,000+ individuals & healthcare users
+                  </motion.p>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Hero Interactive Mockup Graphic */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, rotateY: 10 }}
+              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+              transition={{ duration: 0.6, delay: 0.3, ease: "back.out(1.7)" }}
+              className="relative perspective-1000"
+            >
+              <motion.div
+                whileHover={{ scale: 1.02, rotateY: -2 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="overflow-hidden border border-charcoal-200/80 p-6 shadow-2xl backdrop-blur-xl bg-white/90 dark:bg-charcoal-900/90">
+                  <div className="flex items-center justify-between border-b border-charcoal-200/70 pb-4 dark:border-charcoal-800">
+                    <div className="flex items-center gap-3">
+                      <motion.div 
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.6 }}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-forest-50 text-forest-600 dark:bg-forest-600/20 dark:text-emerald-400"
+                      >
+                        <ShieldCheck size={22} />
+                      </motion.div>
+                      <div>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-forest-600 dark:text-emerald-400">
+                        Live Scanner Preview
+                      </span>
+                      <h3 className="font-display font-bold text-base text-charcoal-900 dark:text-white">
+                        {currentProduct.name}
+                      </h3>
+                    </div>
+                  </div>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-extrabold ${
+                      currentProduct.status === "Unsafe"
+                        ? "bg-danger-50 text-danger-700 border border-danger-500/20"
+                        : currentProduct.status === "Warning"
+                        ? "bg-warning-50 text-warning-700 border border-warning-500/20"
+                        : "bg-success-50 text-success-700 border border-success-500/20"
+                    }`}
+                  >
+                    {currentProduct.status}
+                  </span>
+                </div>
+
+                <div className="relative my-5 rounded-2xl bg-charcoal-900 p-5 text-white shadow-inner">
+                  {/* Laser scan line overlay */}
+                  {isScanningDemo && (
+                    <div className="scan-laser-line absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#2E8B57]" />
+                  )}
+
+                  <p className="text-xs font-bold uppercase tracking-wider text-charcoal-400">Extracted Ingredient Label</p>
+                  <p className="mt-2 text-xs leading-relaxed font-mono text-charcoal-200 bg-charcoal-950 p-3 rounded-xl border border-charcoal-800">
+                    {currentProduct.ingredients}
+                  </p>
+
+                  <div className="mt-4 space-y-2">
+                    {currentProduct.detectedAllergens.map((item) => (
+                      <div
+                        key={item.name}
+                        className="flex items-center justify-between rounded-xl bg-danger-500/15 border border-danger-500/30 px-3.5 py-2 text-xs"
+                      >
+                        <span className="font-bold text-danger-300 flex items-center gap-1.5">
+                          <ShieldAlert size={14} />
+                          {item.name} ({item.type})
+                        </span>
+                        <span className="font-extrabold text-danger-400">{item.severity} Risk</span>
+                      </div>
+                    ))}
+
+                    {currentProduct.safeIngredients.slice(0, 3).map((item) => (
+                      <div
+                        key={item}
+                        className="flex items-center justify-between rounded-xl bg-success-500/10 border border-success-500/20 px-3.5 py-2 text-xs"
+                      >
+                        <span className="font-medium text-emerald-300 flex items-center gap-1.5">
+                          <CheckCircle2 size={14} className="text-emerald-400" />
+                          {item}
+                        </span>
+                        <span className="font-semibold text-emerald-400">Safe</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-forest-50 p-4 border border-forest-500/20 dark:bg-forest-600/10">
+                  <p className="text-xs font-bold uppercase tracking-wider text-forest-700 dark:text-emerald-400">
+                    Safety Recommendation
+                  </p>
+                  <p className="mt-1 text-xs font-medium leading-relaxed text-charcoal-700 dark:text-charcoal-300">
+                    {currentProduct.recommendation}
+                  </p>
+                </div>
+              </Card>
+              </motion.div>
+            </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* STATISTICS SECTION */}
+        <section className="border-y border-charcoal-200/70 bg-cream-100/60 py-12 dark:border-charcoal-800 dark:bg-charcoal-900/50">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid gap-8 md:grid-cols-3">
+              {statsData.map((stat) => (
+                <div key={stat.label} className="text-center">
+                  <p className="font-display text-4xl font-extrabold text-charcoal-900 dark:text-white lg:text-5xl">
+                    {stat.number}
+                    <span className="text-forest-600 dark:text-emerald-400">{stat.suffix}</span>
+                  </p>
+                  <p className="mt-2 text-xs font-bold uppercase tracking-widest text-charcoal-500 dark:text-charcoal-400">
+                    {stat.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* INTERACTIVE DEMO SECTION */}
+        <section id="demo" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-forest-600 dark:text-emerald-400">
+              Try It Right Now
+            </span>
+            <h2 className="mt-2 font-display text-3xl font-extrabold text-charcoal-900 dark:text-white sm:text-4xl">
+              Simulate a Live Food Label Scan
+            </h2>
+            <p className="mt-3 text-base text-charcoal-600 dark:text-charcoal-300">
+              Select any sample label below to test how AllergyShield AI parses ingredients and evaluates personal risk in real time.
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-3 max-w-3xl mx-auto">
+            {sampleProducts.map((prod, idx) => (
+              <button
+                key={prod.name}
+                type="button"
+                onClick={() => handleSimulateScan(idx)}
+                className={`rounded-2xl p-4 text-left transition-all duration-200 cursor-pointer ${
+                  selectedDemo === idx
+                    ? "bg-white border-2 border-forest-600 shadow-md dark:bg-charcoal-900 dark:border-emerald-500"
+                    : "bg-cream-50/80 border border-charcoal-200/80 hover:bg-white dark:bg-charcoal-900/60 dark:border-charcoal-800"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-charcoal-500 dark:text-charcoal-400">{prod.category}</span>
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full ${
+                      prod.status === "Unsafe"
+                        ? "bg-danger-500"
+                        : prod.status === "Warning"
+                        ? "bg-warning-500"
+                        : "bg-success-500"
+                    }`}
+                  />
+                </div>
+                <p className="font-display font-bold text-sm text-charcoal-900 dark:text-white">{prod.name}</p>
+                <p className="mt-2 text-xs text-forest-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                  <RefreshCw size={12} className={isScanningDemo && selectedDemo === idx ? "animate-spin" : ""} />
+                  Click to simulate scan
+                </p>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* FEATURES SECTION */}
+        <section id="features" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-forest-600 dark:text-emerald-400">
+              Core Capabilities
+            </span>
+            <h2 className="mt-2 font-display text-3xl font-extrabold text-charcoal-900 dark:text-white sm:text-4xl">
+              Designed for Speed, Accuracy, & Calm
+            </h2>
+            <p className="mt-3 text-base text-charcoal-600 dark:text-charcoal-300">
+              Everything you need to verify ingredient labels confidently without wading through misleading marketing claims.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {features.map(({ icon: Icon, title, text }) => (
+              <Card key={title} hover className="p-7">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-forest-50 text-forest-600 dark:bg-forest-600/20 dark:text-emerald-400">
+                  <Icon size={24} />
+                </div>
+                <h3 className="mt-5 font-display text-lg font-bold text-charcoal-900 dark:text-white">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-charcoal-600 dark:text-charcoal-400">{text}</p>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* TESTIMONIALS CAROUSEL */}
+        <section id="testimonials" className="border-t border-charcoal-200/70 bg-cream-100/60 py-20 dark:border-charcoal-800 dark:bg-charcoal-900/50">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+              <span className="text-xs font-bold uppercase tracking-widest text-forest-600 dark:text-emerald-400">
+                User Feedback
+              </span>
+              <h2 className="mt-2 font-display text-3xl font-extrabold text-charcoal-900 dark:text-white sm:text-4xl">
+                What People Say
+              </h2>
+            </div>
+
+            <div className="mt-12 max-w-3xl mx-auto">
+              <Card className="p-8 text-center relative overflow-hidden">
+                <div className="flex justify-center gap-1 text-warning-500 mb-4">
+                  {[...Array(testimonials[activeTestimonial].rating)].map((_, i) => (
+                    <Star key={i} size={18} fill="currentColor" />
+                  ))}
+                </div>
+
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={activeTestimonial}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.25 }}
+                    className="font-display text-xl font-medium leading-relaxed text-charcoal-800 dark:text-cream-100 italic"
+                  >
+                    &ldquo;{testimonials[activeTestimonial].quote}&rdquo;
+                  </motion.p>
+                </AnimatePresence>
+
+                <div className="mt-6">
+                  <p className="font-display font-bold text-base text-charcoal-900 dark:text-white">
+                    {testimonials[activeTestimonial].author}
+                  </p>
+                  <p className="text-xs font-semibold text-forest-600 dark:text-emerald-400">
+                    {testimonials[activeTestimonial].role}
+                  </p>
+                </div>
+
+                <div className="mt-6 flex items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    aria-label="Previous testimonial"
+                    onClick={() => setActiveTestimonial((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1))}
+                    className="rounded-xl border border-charcoal-200 p-2 text-charcoal-600 hover:bg-cream-100 dark:border-charcoal-700 dark:text-charcoal-300 dark:hover:bg-charcoal-800"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <div className="flex gap-1.5">
+                    {testimonials.map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        aria-label={`Go to slide ${idx + 1}`}
+                        onClick={() => setActiveTestimonial(idx)}
+                        className={`h-2 rounded-full transition-all ${
+                          activeTestimonial === idx ? "w-6 bg-forest-600 dark:bg-emerald-500" : "w-2 bg-charcoal-300 dark:bg-charcoal-700"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    aria-label="Next testimonial"
+                    onClick={() => setActiveTestimonial((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1))}
+                    className="rounded-xl border border-charcoal-200 p-2 text-charcoal-600 hover:bg-cream-100 dark:border-charcoal-700 dark:text-charcoal-300 dark:hover:bg-charcoal-800"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ ACCORDION */}
+        <section id="faq" className="mx-auto max-w-4xl px-4 py-20 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-forest-600 dark:text-emerald-400">
+              Questions & Answers
+            </span>
+            <h2 className="mt-2 font-display text-3xl font-extrabold text-charcoal-900 dark:text-white">
+              Frequently Asked Questions
+            </h2>
+          </div>
+
+          <div className="mt-10 space-y-4">
+            {faqs.map((faq, idx) => (
+              <Card key={faq.question} className="overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="flex w-full items-center justify-between p-6 text-left cursor-pointer"
+                >
+                  <span className="font-display font-bold text-base text-charcoal-900 dark:text-white">
+                    {faq.question}
+                  </span>
+                  <ChevronDown
+                    size={20}
+                    className={`shrink-0 text-charcoal-400 transition-transform duration-200 ${
+                      openFaq === idx ? "rotate-180 text-forest-600 dark:text-emerald-400" : ""
+                    }`}
+                  />
+                </button>
+                <AnimatePresence>
+                  {openFaq === idx && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="border-t border-charcoal-200/60 px-6 pb-6 pt-3 dark:border-charcoal-800"
+                    >
+                      <p className="text-sm leading-relaxed text-charcoal-600 dark:text-charcoal-300">
+                        {faq.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* FINAL CTA */}
+        <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+          <Card className="relative overflow-hidden bg-forest-600 p-10 text-white shadow-2xl dark:bg-forest-800">
+            <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-emerald-400/20 blur-3xl" />
+            <div className="relative z-10 mx-auto max-w-2xl text-center">
+              <h2 className="font-display text-3xl font-extrabold sm:text-4xl text-white">
+                Ready to Make Every Food Choice Safer?
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-cream-100/90">
+                Join thousands of individuals who trust AllergyShield AI for instant food label scans and allergen protection.
+              </p>
+              <div className="mt-8 flex justify-center">
+                <Button as={Link} to="/register" variant="secondary" size="lg" icon={ScanLine}>
+                  Create Free Account
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </section>
+      </main>
+
+      <footer className="border-t border-charcoal-200/80 bg-cream-50 text-charcoal-600 dark:border-charcoal-800 dark:bg-charcoal-950 dark:text-charcoal-400">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="grid gap-8 md:grid-cols-4 pb-8 border-b border-charcoal-200/60 dark:border-charcoal-800">
+            <div className="space-y-3 md:col-span-2">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-forest-600 text-white dark:bg-emerald-500">
+                  <ShieldCheck size={20} />
+                </div>
+                <span className="font-display font-extrabold text-lg text-charcoal-900 dark:text-white">AllergyShield AI</span>
+              </div>
+              <p className="text-xs leading-relaxed text-charcoal-500 dark:text-charcoal-400 max-w-sm">
+                Empowering individuals and families with instant, AI-driven ingredient label analysis and personal allergen risk protection.
+              </p>
+              <div className="flex items-center gap-2 pt-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold text-charcoal-700 dark:text-charcoal-300">All Systems Operational</span>
+              </div>
+            </div>
+
+            <div>
+              <p className="font-display font-bold text-xs uppercase tracking-wider text-charcoal-900 dark:text-white mb-3">Product</p>
+              <ul className="space-y-2 text-xs">
+                <li><a href="#features" className="hover:text-forest-600 dark:hover:text-emerald-400 transition-colors">Features</a></li>
+                <li><a href="#demo" className="hover:text-forest-600 dark:hover:text-emerald-400 transition-colors">Live Demo</a></li>
+                <li><Link to="/scan" className="hover:text-forest-600 dark:hover:text-emerald-400 transition-colors">Label Scanner</Link></li>
+                <li><Link to="/login" className="hover:text-forest-600 dark:hover:text-emerald-400 transition-colors">Log In</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="font-display font-bold text-xs uppercase tracking-wider text-charcoal-900 dark:text-white mb-3">Medical Disclaimer</p>
+              <p className="text-xs leading-relaxed text-charcoal-500 dark:text-charcoal-400">
+                AllergyShield AI provides food label parsing assistance. Always verify product packaging and consult a certified medical specialist for severe allergies.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-charcoal-500 dark:text-charcoal-400">
+            <p>© 2026 AllergyShield AI. All rights reserved.</p>
+            <p>Designed with Nature & Healthcare aesthetics.</p>
+          </div>
+        </div>
+      </footer>
+    </motion.div>
+  );
+}

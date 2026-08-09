@@ -7,12 +7,12 @@ import { useTheme } from "../../hooks/useTheme";
 import { pageTransition } from "../../animations/page";
 
 const TITLES = {
-  "/dashboard": "Dashboard",
-  "/scan": "Scan Label",
-  "/allergies": "My Allergies",
-  "/history": "Scan History",
-  "/profile": "Profile",
-  "/settings": "Profile",
+  "/dashboard": "Dashboard Overview",
+  "/scan": "Scan Food Label",
+  "/allergies": "My Allergy Watch List",
+  "/history": "Scan History Timeline",
+  "/profile": "Safety & Account Profile",
+  "/settings": "Safety & Account Profile",
 };
 
 export default function DashboardLayout() {
@@ -34,7 +34,7 @@ export default function DashboardLayout() {
         />
 
         <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
-          <motion.div key={location.pathname} {...pageTransition}>
+          <motion.div key={location.pathname} {...pageTransition} className="mx-auto max-w-7xl">
             <Outlet />
           </motion.div>
         </main>

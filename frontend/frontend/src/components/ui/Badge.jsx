@@ -1,20 +1,20 @@
 const styles = {
   success:
-    "bg-success-50 text-success-600 ring-success-500/15 dark:bg-success-500/10 dark:text-success-500",
+    "bg-success-50 text-success-700 border border-success-500/20 dark:bg-success-500/10 dark:text-emerald-400 dark:border-emerald-500/30",
   danger:
-    "bg-danger-50 text-danger-600 ring-danger-500/15 dark:bg-danger-500/10 dark:text-danger-500",
+    "bg-danger-50 text-danger-700 border border-danger-500/20 dark:bg-danger-500/10 dark:text-danger-400 dark:border-danger-500/30",
   warning:
-    "bg-warning-50 text-warning-600 ring-warning-500/15 dark:bg-warning-500/10 dark:text-warning-500",
+    "bg-warning-50 text-warning-700 border border-warning-500/20 dark:bg-warning-500/10 dark:text-warning-400 dark:border-warning-500/30",
   primary:
-    "bg-primary-50 text-primary-600 ring-primary-500/15 dark:bg-primary-500/10 dark:text-primary-500",
+    "bg-primary-50 text-primary-700 border border-primary-500/20 dark:bg-primary-500/10 dark:text-emerald-400 dark:border-emerald-500/30",
   neutral:
-    "bg-ink-100 text-ink-600 ring-ink-500/10 dark:bg-slate-800 dark:text-slate-300",
+    "bg-charcoal-100 text-charcoal-700 border border-charcoal-200 dark:bg-charcoal-800 dark:text-charcoal-300 dark:border-charcoal-700",
 };
 
 export default function Badge({ tone = "neutral", children, className = "" }) {
   return (
     <span
-      className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-bold ring-1 ${styles[tone]} ${className}`}
+      className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold tracking-wide ${styles[tone] || styles.neutral} ${className}`}
     >
       {children}
     </span>

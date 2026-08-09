@@ -3,10 +3,10 @@ import { motion } from "framer-motion";
 export default function Skeleton({ className = "" }) {
   return (
     <motion.div
-      initial={{ opacity: 0.55 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
-      className={`rounded-xl bg-ink-100 dark:bg-slate-800 ${className}`}
+      initial={{ opacity: 0.4 }}
+      animate={{ opacity: 0.9 }}
+      transition={{ duration: 0.9, repeat: Infinity, repeatType: "reverse" }}
+      className={`rounded-xl bg-charcoal-200/70 dark:bg-charcoal-800 ${className}`}
     />
   );
 }

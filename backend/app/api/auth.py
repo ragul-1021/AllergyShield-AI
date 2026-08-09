@@ -121,7 +121,7 @@ def forgot_password(request: ForgotPasswordRequest, db: Session = Depends(get_db
         raise HTTPException(status_code=404, detail="No account found with this email")
     
     reset_token = email_service.generate_reset_token(db, request.email)
-    frontend_url = os.getenv("FRONTEND_URL", "http://127.0.0.1:5174")
+    frontend_url = os.getenv("FRONTEND_URL", "http://127.0.0.1:5173")
     reset_link = f"{frontend_url}/reset-password?token={reset_token}"
     
     if email_service.send_reset_email(request.email, reset_link):

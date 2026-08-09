@@ -9,8 +9,17 @@ def get_database_url():
     database_url = os.getenv("DATABASE_URL", "sqlite:///./allergyshield.db").strip()
     database_url = database_url.strip("\"'`")
 
+    if database_url.startswith("DATABASE_URL="):
+        database_url = database_url.split("=", 1)[1].strip().strip("\"'`")
+
+    if "YOUR_PASSWORD" in database_url or "YOUR_HOST" in database_url or "YOUR_" in database_url:
+        database_url = "sqlite:///./allergyshield.db"
+
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+    if not database_url.startswith(("sqlite://", "postgresql://")):
+        database_url = "sqlite:///./allergyshield.db"
 
     return database_url
 
