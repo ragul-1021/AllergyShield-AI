@@ -171,7 +171,7 @@ export default function Login() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="you@gmail.com"
                 error={emailError}
               />
 

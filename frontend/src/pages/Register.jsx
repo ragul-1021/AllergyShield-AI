@@ -136,7 +136,7 @@ export default function Register() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="you@gmail.com"
                 error={emailError}
               />
 

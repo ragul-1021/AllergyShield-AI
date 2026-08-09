@@ -97,7 +97,7 @@ export default function ForgotPassword() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder="you@gmail.com"
               error={emailError}
             />
 
