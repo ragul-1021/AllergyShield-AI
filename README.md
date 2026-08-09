@@ -446,6 +446,8 @@ Each independent deployment should use its own database.
  Product comparison
  Allergy notifications
  Analytics dashboard
+
+ 
 🧪 Example
 
 Suppose a food label contains:
